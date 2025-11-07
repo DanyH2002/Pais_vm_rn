@@ -9,7 +9,7 @@ export type RootStackParamList = {
     debug: undefined;
 };
 export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'home'>;
-export type UserScreenProps = NativeStackScreenProps<RootStackParamList, 'debug'>;
+export type DebugScreenProps = NativeStackScreenProps<RootStackParamList, 'debug'>;
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function Routes() {
