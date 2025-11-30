@@ -16,6 +16,27 @@ export default function Debug({ route, navigation }: DebugScreenProps) {
                 <Text> Resaltar a home</Text>
             </Pressable>
             <Text>{bug}</Text>
+
+            {/*<Text> Inicio de Nuestra App</Text>
+            <Pressable
+                onPress={() => enviar()}
+            >
+                <Text> Ir a bug</Text>
+            </Pressable>
+            <Pressable
+                            onPress={() =>
+                                navigation.push('home')
+                            }
+                        >
+                            <Text> Ir a home</Text>
+                        </Pressable>
+                        <Pressable
+                            onPress={() =>
+                                navigation.push('debug')
+                            }
+                        >
+                            <Text> Ir a debug</Text>
+                        </Pressable> */}
         </View>
     )
 }
