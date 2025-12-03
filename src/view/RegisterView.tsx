@@ -1,17 +1,35 @@
 import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from "react-native";
+import { useAuth } from '../context/authContext';
+import { RegisterProps } from '../routes';
 
-export default function RegisterView() {
+export default function RegisterView({ navigation }: RegisterProps) {
     const [name, setName] = useState("");
     const [lastName, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
+    const { register, loading } = useAuth();
 
+    const handleRegister = async () => {
+        if (!name || !lastName || !email || !password || !phone) {
+            Alert.alert('Error', 'Por favor completa todos los campos');
+            return;
+        }
+        try {
+            await register({ name, last_name: lastName, email, password, phone });
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo crear la cuenta');
+        }
+    }
+
+    const goToLogin = () => {
+        navigation.navigate('login');
+    }
     return (
         <View style={styles.container}>
             <Text style={styles.title}>InfoPaís</Text>
-            <Text style={styles.subtitle}>Login</Text>
+            <Text style={styles.subtitle}>Registro</Text>
 
             <View style={styles.line} />
 
@@ -49,11 +67,15 @@ export default function RegisterView() {
                 onChangeText={setPassword} />
 
             <TouchableOpacity
-                style={styles.button}>
-                <Text style={styles.buttonText}>Crear cuenta</Text>
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleRegister}
+                disabled={loading}>
+                <Text style={styles.buttonText}>
+                    {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+                </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={goToLogin}>
                 <Text style={styles.link}>¿Ya tienes una cuenta?</Text>
             </TouchableOpacity>
         </View>
@@ -96,6 +118,9 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 30,
         marginTop: 10,
+    },
+    buttonDisabled: {
+        backgroundColor: "#cccccc",
     },
     buttonText: {
         textAlign: "center",

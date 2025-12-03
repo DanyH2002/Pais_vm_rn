@@ -7,6 +7,10 @@ import CountryForms from "./src/view/CountryForms";
 import Home from "./src/view/Home";
 import CountryDetails from "./src/view/CountryDetails";
 
+import React from "react";
+import { AuthProvider } from "./src/context/authContext";
+import { CountryProvider } from "./src/context/countryContext";
+
 export default function App() {
   return (
     // <Routes />
@@ -19,7 +23,7 @@ export default function App() {
     //   onSelect={(value) => console.log("Seleccionado:", value)}
     // />
     // <CountryForms />
-    <Home />
+    // <Home />
     // <CountryDetails
     //   country={{
     //     id: 1,
@@ -40,5 +44,10 @@ export default function App() {
     //   }}
     // />
 
+    <AuthProvider>
+      <CountryProvider>
+        <Routes />
+      </CountryProvider>
+    </AuthProvider>
   );
 }

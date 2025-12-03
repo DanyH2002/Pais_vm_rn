@@ -1,73 +1,129 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
-import type { Country } from "../types/Country";
+import React, { useEffect } from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet, Alert } from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { useCountry } from "../context/countryContext";
+import { useAuth } from "../context/authContext";
+import type { CountryDetailsProps } from "../routes";
 
-type Props = {
-    country: Country;
-};
+export default function CountryDetails() {
+    const route = useRoute<CountryDetailsProps["route"]>();
+    const navigation = useNavigation<CountryDetailsProps["navigation"]>();
+    const { id } = route.params;
 
-function LabelValue({ label, value }: { label: string; value?: any }) {
-    return (
+    const { selectedCountry, getCountry, deleteCountry } = useCountry();
+    const { user } = useAuth();
+
+    useEffect(() => {
+        getCountry(id);
+    }, [id]);
+
+    if (!selectedCountry) {
+        return (
+            <View style={styles.center}>
+                <Text>Cargando país...</Text>
+            </View>
+        );
+    }
+
+    const country = selectedCountry;
+
+    const canEdit = user && country.user_id === user.id;
+
+    const handleDelete = () => {
+        Alert.alert(
+            "Eliminar país",
+            "¿Estás seguro de eliminar este país?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                {
+                    text: "Eliminar",
+                    style: "destructive",
+                    onPress: async () => {
+                        const ok = await deleteCountry(country.id);
+                        if (ok) navigation.goBack();
+                    }
+                }
+            ]
+        )
+    }
+
+    const LabelValue = ({ label, value }: { label: string; value?: any }) => (
         <>
             <Text style={styles.label}>{label}:</Text>
             <Text style={styles.value}>{value ?? "—"}</Text>
         </>
-    );
-}
+    )
 
-export default function CountryDetails({ country }: Props) {
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.mainTitle}>InfoPaís</Text>
+            <Text style={styles.title}>InfoPaís</Text>
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.goBack()}
+            >
+                <Text style={styles.backText}>◀ Volver</Text>
+            </TouchableOpacity>
             <View style={styles.line} />
 
             <Text style={styles.countryName}>{country.name}</Text>
 
-            <Image source={{ uri: country.flag }} style={styles.flag} />
+            <Image
+                source={{ uri: "http://127.0.0.1:8000/storage/" + country.flag }}
+                style={styles.flag}
+            />
 
             <View style={styles.card}>
                 <LabelValue label="Nombre oficial" value={country.official_name} />
-
                 <LabelValue label="Capital" value={country.capital} />
-
                 <LabelValue label="Presidente" value={country.president} />
-
-                <LabelValue
-                    label="Población"
-                    value={country.population?.toLocaleString()}
-                />
-
+                <LabelValue label="Población" value={country.population} />
                 <LabelValue label="Tamaño" value={`${country.size} km²`} />
-
                 <LabelValue label="Continente" value={country.continent?.name} />
-
                 <LabelValue label="Idioma" value={country.language?.name} />
-
                 <LabelValue label="Moneda" value={country.currency?.name} />
             </View>
 
-            <View style={styles.buttonRow}>
-                <TouchableOpacity style={[styles.button, styles.editButton]}>
-                    <Text style={styles.buttonText}>Editar</Text>
-                </TouchableOpacity>
+            {canEdit && (
+                <View style={styles.buttonRow}>
+                    <TouchableOpacity
+                        style={[styles.button, styles.editButton]}
+                        onPress={() =>
+                            navigation.navigate("countryForm", {
+                                mode: "edit",
+                                id: country.id
+                            })
+                        }
+                    >
+                        <Text style={styles.buttonText}>Editar</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button, styles.deleteButton]}>
-                    <Text style={styles.buttonText}>Eliminar</Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                        style={[styles.button, styles.deleteButton]}
+                        onPress={handleDelete}
+                    >
+                        <Text style={styles.buttonText}>Eliminar</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
         </ScrollView>)
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 25,
-        backgroundColor: "#fff",
+        padding: 60,
+        backgroundColor: "#ffffffe3",
         paddingBottom: 90,
     },
-    mainTitle: {
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    title: {
         fontSize: 28,
         fontWeight: "700",
         textAlign: "center",
+        marginTop: 10,
         marginBottom: 5,
     },
     line: {
@@ -84,8 +140,8 @@ const styles = StyleSheet.create({
     },
     flag: {
         width: "100%",
-        height: 180,
-        borderRadius: 12,
+        height: 150,
+        borderRadius: 10,
         marginBottom: 25,
     },
     card: {
@@ -127,4 +183,15 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         fontSize: 16,
     },
+    backButton: {
+        position: "absolute",
+        left: 20,
+        top: 50,
+        padding: 8,
+    },
+    backText: {
+        fontSize: 18,
+        color: "#3573E5",
+        fontWeight: "600",
+    }
 });

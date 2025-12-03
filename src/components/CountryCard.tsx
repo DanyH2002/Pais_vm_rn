@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 type Props = {
     name: string;
     capital: string;
-    population: string;
+    population: string | number;
     flag: string;
 };
 

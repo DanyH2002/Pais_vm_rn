@@ -20,8 +20,8 @@ export type Country = {
     official_name: string;
     president: string;
     capital: string;
-    size: number;
-    population: number;
+    size: number | string;
+    population: number | string;
     flag: string;
 
     continent_id: number;
@@ -34,17 +34,19 @@ export type Country = {
     continent?: Continent;
     language?: Language;
     currency?: Currency;
-    user?: User
+    user?: User;
 }
 
 export type ApiResponseList<T> = {
     success: boolean;
+    status: number;
     message: string;
     data: T[];
-};
+}
 
 export type ApiResponseItem<T> = {
     success: boolean;
+    status: number;
     message: string;
     data: T;
-};
+}

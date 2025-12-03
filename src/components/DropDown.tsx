@@ -1,31 +1,34 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, FlatList } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+
+type Option = {
+    id: number | string;
+    name: string;
+};
 
 type DropdownProps = {
     label: string;
-    options: string[];
-    onSelect?: (value: string) => void;
+    options: Option[];
+    value?: string | number;
+    onSelect?: (id: string) => void;
 };
 
-export default function Dropdown({ label, options, onSelect }: DropdownProps) {
+export default function Dropdown({ label, options, value, onSelect }: DropdownProps) {
     const [open, setOpen] = useState(false);
-    const [selected, setSelected] = useState("");
+    const [selected, setSelected] = useState<Option | null>(null);
 
-    const handleSelect = (value: string) => {
-        setSelected(value);
+    useEffect(() => {
+        if (value) {
+            const found = options.find(o => String(o.id) === String(value));
+            if (found) setSelected(found);
+        }
+    }, [value, options])
+
+    const handleSelect = (item: Option) => {
+        setSelected(item);
         setOpen(false);
-        onSelect && onSelect(value);
-    };
-
-    const renderOption = (item: string) => (
-        <TouchableOpacity
-            key={item}
-            style={styles.option}
-            onPress={() => handleSelect(item)}
-        >
-            <Text style={styles.optionText}>{item}</Text>
-        </TouchableOpacity>
-    );
+        onSelect && onSelect(String(item.id));
+    }
 
     return (
         <View style={styles.container}>
@@ -36,24 +39,23 @@ export default function Dropdown({ label, options, onSelect }: DropdownProps) {
                 onPress={() => setOpen(!open)}
             >
                 <Text style={selected ? styles.selected : styles.placeholder}>
-                    {selected || "Selecciona una opción"}
+                    {selected ? selected.name : "Selecciona una opción"}
                 </Text>
             </TouchableOpacity>
 
             {open && (
                 <View style={styles.dropdown}>
-                    {options.length < 20 ? (
-                        <ScrollView>
-                            {options.map(renderOption)}
-                        </ScrollView>
-                    ) : (
-                        <FlatList
-                            data={options}
-                            keyExtractor={(item) => item}
-                            renderItem={({ item }) => renderOption(item)}
-                            nestedScrollEnabled
-                        />
-                    )}
+                    <ScrollView>
+                        {options.map(item => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={styles.option}
+                                onPress={() => handleSelect(item)}
+                            >
+                                <Text style={styles.optionText}>{item.name}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
                 </View>
             )}
         </View>

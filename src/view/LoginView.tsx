@@ -1,9 +1,28 @@
 import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Alert } from "react-native";
+import { useAuth } from '../context/authContext';
+import { LoginProps } from '../routes';
 
-export default function LoginView() {
+export default function LoginView({ navigation }: LoginProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { login, loading } = useAuth();
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Error", "Por favor completa todos los campos");
+            return;
+        }
+
+        const ok = await login(email, password);
+        if (!ok) {
+            Alert.alert("Error", "Credenciales incorrectas");
+        }
+    }
+
+    const goToRegister = () => {
+        navigation.navigate('register');
+    }
 
     return (
         <View style={styles.container}>
@@ -26,11 +45,15 @@ export default function LoginView() {
                 onChangeText={setPassword} />
 
             <TouchableOpacity
-                style={styles.button}>
-                <Text style={styles.buttonText}>Ingresar</Text>
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}>
+                <Text style={styles.buttonText}>
+                    {loading ? 'Cargando...' : 'Ingresar'}
+                </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={goToRegister}>
                 <Text style={styles.link}>¿No tienes cuenta?</Text>
             </TouchableOpacity>
         </View>
@@ -73,6 +96,9 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         borderRadius: 30,
         marginTop: 10,
+    },
+    buttonDisabled: {
+        backgroundColor: "#cccccc",
     },
     buttonText: {
         textAlign: "center",
